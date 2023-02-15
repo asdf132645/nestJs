@@ -20,14 +20,14 @@ export class UsersService {
     return this.usersRepository.findOne(id);
   }
 
-  async create(user:CreateUserDTO) {
-    await this.usersRepository.save(user)
+  async create(user: CreateUserDTO) {
+    await this.usersRepository.save(user);
   }
 
-  async update(id:string, user:UpdateUserDTO) {
+  async update(id: string, user: UpdateUserDTO) {
     const prevUser = await this.usersRepository.findOne(id);
-    let userToUpdate = {...prevUser, ...user}
-    await this.usersRepository.save(userToUpdate)
+    const userToUpdate = { ...prevUser, ...user };
+    await this.usersRepository.save(userToUpdate);
   }
 
   async remove(id: string): Promise<void> {

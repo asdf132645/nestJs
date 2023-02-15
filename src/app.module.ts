@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { BoardModule } from './board/board.module';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
@@ -10,7 +9,6 @@ import * as Joi from 'joi';
 @Module({
   controllers: [AppController],
   imports: [
-    BoardModule,
     UsersModule,
     ConfigModule.forRoot({
       envFilePath: process.env.NODE_ENV == 'dev' ? '.dev.env' : '.prod.env',
