@@ -27,7 +27,7 @@ describe('AppController (e2e)', () => {
       .expect('Welcom to my Movie API');
   });
 
-  describe("/movies", ()=>{
+  describe("/board", ()=>{
     it('GET', ()=>{
       return request(app.getHttpServer())
         .get('/movies')
@@ -60,7 +60,7 @@ describe('AppController (e2e)', () => {
 
   })
 
-  describe('/movies/:id', ()=>{
+  describe('/board/:id', ()=>{
     it('GET 200', ()=>{
       return request(app.getHttpServer())
         .get('/movies/1')
