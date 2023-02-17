@@ -1,38 +1,34 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/entities/user.entity';
-import { UsersModule } from './users/users.module';
-import { ConfigModule } from '@nestjs/config';
-import * as Joi from 'joi';
+import { typeORMConfig } from './configs/typeorm.config';
+
+import { UserModule } from './user/user.module';
+import { AuthMiddleware } from './middleware/auth.middleware';
+import { UserController } from './user/user.controller';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  controllers: [AppController],
   imports: [
-    UsersModule,
-    ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV == 'dev' ? '.dev.env' : '.prod.env',
-      isGlobal: true,
-      validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('dev', 'prod').required(),
-        DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.string().required(),
-        DB_USERNAME: Joi.string().required(),
-        DB_PASSWD: Joi.string().required(),
-        DB_DATABASE: Joi.string().required(),
-      }),
-    }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWD,
-      database: process.env.DB_DATABASE,
-      entities: [User],
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(typeORMConfig), // TypeORM 설정 파일 연결
+    UserModule,
+    AuthModule,
   ],
+  controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      //exclude 함수는 제외 하고싶은 라우터를 등록합니다.
+      .exclude({ path: 'user/create_user', method: RequestMethod.POST }) // 유저 생성
+      .exclude({ path: 'user/user_all', method: RequestMethod.GET }) // 유저 전체 조회
+      .forRoutes(UserController); // 1.유저 컨트롤러 등록
+    // .forRoutes('user'); // 2.유저 컨트롤러 경로 등록 -> 위 1번과 동일
+  }
+}
