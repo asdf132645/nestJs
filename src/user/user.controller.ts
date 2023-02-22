@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, CheckSmsDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/roles.decorator';
@@ -29,6 +29,14 @@ export class UserController {
   sendSms(@Body() phoneNumber: any): Promise<string> {
     // console.log(phoneNumber);
     return this.userService.sendSMS(String(phoneNumber.phoneNumber));
+  }
+
+  @Post('checkSms')
+  checkSms(@Body() CheckSmsDto: CheckSmsDto): Promise<boolean> {
+    return this.userService.checkSMS(
+      CheckSmsDto.phoneNumber,
+      CheckSmsDto.inputNumber,
+    );
   }
 
   @Get()

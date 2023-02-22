@@ -19,3 +19,11 @@ export class CreateUserDto {
   @IsString()
   accountName: string;
 }
+
+export class CheckSmsDto {
+  @IsString()
+  phoneNumber: string;
+
+  @IsString()
+  inputNumber: string;
+}
