@@ -1,0 +1,7 @@
+PUT http://localhost:3000/user/3
+Content-Type: application/json
+
+{
+  "userId": "thkim",
+  "userName": "김태형"
+}

@@ -1,0 +1,10 @@
+POST http://localhost:3000/user
+Content-Type: application/json
+#Authorization: {{access_token}}
+
+{
+  "userId": "user",
+  "userName": "사용자",
+  "password": "user",
+  "role": "user"
+}
