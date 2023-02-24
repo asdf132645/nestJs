@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Logger,
   Param,
   Post,
   Put,
@@ -15,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Role } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Response, ResponseMessage } from '../response.util';
 
 @Controller('user')
 export class UserController {
@@ -26,9 +28,15 @@ export class UserController {
   }
 
   @Post('sendSms')
-  sendSms(@Body() phoneNumber: any): Promise<string> {
+  public async sendSms(@Body() phoneNumber: any): Promise<Response> {
     // console.log(phoneNumber);
-    return this.userService.sendSMS(String(phoneNumber.phoneNumber));
+    try {
+      const result = this.userService.sendSMS(String(phoneNumber.phoneNumber));
+      // console.log(result);
+      return new ResponseMessage().success().body(result).build();
+    } catch (e) {
+      Logger.error(e);
+    }
   }
 
   @Post('checkSms')

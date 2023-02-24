@@ -2,11 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  const whitelist = ['http://localhost:3000', 'http://10.1.1.107:49619'];
+  const whitelist = ['http://localhost:3000', 'http://10.1.1.107:63007'];
   app.enableCors({
     origin: function (origin, callback) {
       if (whitelist.indexOf(origin) !== -1) {
@@ -30,6 +31,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.use(cookieParser());
   await app.listen(3000);
 }
 bootstrap();

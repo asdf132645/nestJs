@@ -18,10 +18,12 @@ import * as bcrypt from 'bcrypt';
 import { bcryptConstant } from '../common/constants';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import { Response, ResponseMessage } from '../response.util';
+import { compare, hash } from 'bcrypt';
 
-const ACCESS_KEY_ID = 'PC0azj722QCCJFcLkoLL';
-const SECRET_KEY = 'l6DGnUyDqzUTSdnUuzDAJkcW9gCCKst8zNHVvbIa';
-const SMS_SERVICE_ID = 'ncp:sms:kr:275253326456:solve';
+// const ACCESS_KEY_ID = process.env.NAVER_ACCESS_KEY_ID;
+// const SECRET_KEY = process.env.NAVER_SECRET_KEY;
+// const SMS_SERVICE_ID = process.env.NAVER_SMS_SERVICE_ID;
 
 interface SMS {
   type: string;
@@ -40,11 +42,40 @@ export class UserService {
     private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  async setCurrentRefreshToken(refreshToken: string, id: number) {
+    const currentHashedRefreshToken = await hash(refreshToken, 10);
+    await this.userRepository.update(id, { currentHashedRefreshToken });
+  }
+
+  async removeRefreshToken(id: number) {
+    return this.userRepository.update(id, {
+      currentHashedRefreshToken: null,
+    });
+  }
+
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
+    const user = await this.findOne(id);
+
+    const isRefreshTokenMatching = await compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
   // SMS 인증 위한 시그니쳐 생성 로직
   makeSignitureForSMS = (): string => {
+    console.log(process.env.NAVER_SMS_SERVICE_ID);
     const message = [];
-    console.log(SECRET_KEY);
-    const hmac = crypto.createHmac('sha256', String(SECRET_KEY));
+    const hmac = crypto.createHmac(
+      'sha256',
+      String(process.env.NAVER_SECRET_KEY),
+    );
     const timeStamp = Date.now().toString();
     const space = ' ';
     const newLine = '\n';
@@ -52,11 +83,11 @@ export class UserService {
 
     message.push(method);
     message.push(space);
-    message.push(`/sms/v2/services/${SMS_SERVICE_ID}/messages`);
+    message.push(`/sms/v2/services/ncp:sms:kr:275253326456:solve/messages`);
     message.push(newLine);
     message.push(timeStamp);
     message.push(newLine);
-    message.push(ACCESS_KEY_ID);
+    message.push(process.env.NAVER_ACCESS_KEY_ID);
     // 시그니쳐 생성
     const signiture = hmac.update(message.join('')).digest('base64');
     // string 으로 반환
@@ -71,7 +102,7 @@ export class UserService {
 
   // SMS 발송 로직
   sendSMS = async (phoneNumber: string) => {
-    console.log(phoneNumber);
+    // console.log(  + '시시시');
     // TODO : 1일 5회 문자인증 초과했는지 확인하는 로직 필요!
     const signiture = this.makeSignitureForSMS();
     // 캐시에 있던 데이터 삭제
@@ -98,7 +129,7 @@ export class UserService {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'x-ncp-apigw-timestamp': Date.now().toString(),
-        'x-ncp-iam-access-key': ACCESS_KEY_ID,
+        'x-ncp-iam-access-key': process.env.NAVER_ACCESS_KEY_ID,
         'x-ncp-apigw-signature-v2': signiture,
       },
     };
@@ -106,20 +137,26 @@ export class UserService {
     // 문자 보내기 (url)
     axios
       .post(
-        `https://sens.apigw.ntruss.com/sms/v2/services/${SMS_SERVICE_ID}/messages`,
+        `https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:275253326456:solve/messages`,
         body,
         options,
       )
       .then(async (res) => {
         // 성공 이벤트
+        return res;
       })
       .catch((err) => {
-        console.error(err.response.data);
-        throw new InternalServerErrorException();
+        // console.error(err.response.data);
+        // return err;
+        throw new ForbiddenException({
+          statusCode: HttpStatus.FORBIDDEN,
+          message: [`메시지 앱 호출 에러`],
+          error: 'Forbidden',
+        });
       });
+
     // 캐시 추가하기
     await this.cacheManager.set(phoneNumber, checkNumber);
-    return 'send end!';
   };
 
   // SMS 확인 로직, 문자인증은 3분 이내에 입력해야지 가능합니다!

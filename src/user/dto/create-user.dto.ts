@@ -8,6 +8,9 @@ export class CreateUserDto {
   userName: string;
 
   @IsString()
+  email: string;
+
+  @IsString()
   password: string;
 
   @IsString()
@@ -18,6 +21,15 @@ export class CreateUserDto {
 
   @IsString()
   accountName: string;
+
+  @IsString()
+  phoneNumber: string;
+
+  @IsString()
+  businessNumber: string;
+
+  @IsString()
+  service: string;
 }
 
 export class CheckSmsDto {
