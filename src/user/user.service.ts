@@ -154,7 +154,7 @@ export class UserService {
       )
       .then(async (res) => {
         // 성공 이벤트
-        return res;
+        return '';
       })
       .catch((err) => {
         // console.error(err.response.data);

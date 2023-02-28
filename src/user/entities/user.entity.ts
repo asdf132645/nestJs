@@ -1,8 +1,16 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { ServiceEntities } from '../../service/entities/service.entities';
 
 @Entity()
-export class User {
+export abstract class User {
   @PrimaryGeneratedColumn()
   seq: number;
 
@@ -33,4 +41,7 @@ export class User {
   @Column({ nullable: true })
   @Exclude()
   currentHashedRefreshToken?: string;
+
 }
+
+

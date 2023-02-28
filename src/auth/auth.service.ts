@@ -92,7 +92,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       userId: loginUserDto.userId,
     });
-    console.log('user')
+    console.log('user');
 
     if (!user) {
       // throw new ForbiddenException({
@@ -149,6 +149,7 @@ export class AuthService {
         .success()
         .body({
           accessToken: this.jwtService.sign(payload),
+          role: payload.role,
           expiresIn: 3600,
         })
         .build();

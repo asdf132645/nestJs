@@ -20,6 +20,7 @@ import { LoginUserDto } from '../user/dto/login-user.dto';
 
 import cookie from 'cookie';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { ResponseMessage } from '../response.util';
 
 @Controller('auth')
 export class AuthController {
@@ -30,18 +31,21 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() userData: LoginUserDto,@Req() req, @Res({ passthrough: true }) res) {
+  async login(
+    @Body() userData: LoginUserDto,
+    @Req() req,
+    @Res({ passthrough: true }) res,
+  ) {
     // console.log(this.authService.login(req.user))
 
-
     const user = await this.userService.getById(userData.userId);
-    console.log(user);
+    // console.log(user);
     const { accessToken, ...accessOption } =
       this.authService.getCookieWithJwtAccessToken(user);
 
     const { refreshToken, ...refreshOption } =
       this.authService.getCookieWithJwtRefreshToken(user);
-    console.log(user);
+    // console.log(user);
     await this.userService.setCurrentRefreshToken(refreshToken, user);
 
     // req.res.setHeader('Set-Cookie', [accessToken, refreshToken]);
@@ -70,7 +74,13 @@ export class AuthController {
     const { accessToken, ...accessOption } =
       this.authService.getCookieWithJwtAccessToken(user.id);
     res.cookie('Authentication', accessToken, accessOption);
-    return user;
+    return new ResponseMessage()
+      .success()
+      .body({
+        user: user,
+        expiresIn: 3600,
+      })
+      .build();
   }
 
   @UseGuards(JwtAuthGuard)
