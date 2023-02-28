@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { ServiceEntities } from '../../service/entities/service.entities';
 
 @Entity()
 export abstract class User {
