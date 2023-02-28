@@ -6,6 +6,9 @@ import {
   Req,
   Res,
   UseGuards,
+  Response,
+  Request,
+  Body,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -13,8 +16,10 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { LoginUserDto } from '../user/dto/login-user.dto';
 
 import cookie from 'cookie';
+import { CreateUserDto } from '../user/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,29 +30,30 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async login(@Body() userData: LoginUserDto,@Req() req, @Res({ passthrough: true }) res) {
     // console.log(this.authService.login(req.user))
-    // return this.authService.login(req.user);
 
-    const user = req.user;
+
+    const user = await this.userService.getById(userData.userId);
+    console.log(user);
     const { accessToken, ...accessOption } =
-      this.authService.getCookieWithJwtAccessToken(user.id);
+      this.authService.getCookieWithJwtAccessToken(user);
 
     const { refreshToken, ...refreshOption } =
-      this.authService.getCookieWithJwtRefreshToken(user.id);
+      this.authService.getCookieWithJwtRefreshToken(user);
+    console.log(user);
+    await this.userService.setCurrentRefreshToken(refreshToken, user);
 
-    await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-    res.setHeader;
-
+    // req.res.setHeader('Set-Cookie', [accessToken, refreshToken]);
     res.cookie('Authentication', accessToken, accessOption);
     res.cookie('Refresh', refreshToken, refreshOption);
 
-    return user;
+    return this.authService.login(user);
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Post('logout')
-  async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
+  @Post('logout') // async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req, @Res() res): Promise<any> {
     const { accessOption, refreshOption } =
       this.authService.getCookiesForLogOut();
 
@@ -55,6 +61,16 @@ export class AuthController {
 
     res.cookie('Authentication', '', accessOption);
     res.cookie('Refresh', '', refreshOption);
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Get('refresh')
+  refresh(@Req() req, @Res({ passthrough: true }) res) {
+    const user = req.user;
+    const { accessToken, ...accessOption } =
+      this.authService.getCookieWithJwtAccessToken(user.id);
+    res.cookie('Authentication', accessToken, accessOption);
+    return user;
   }
 
   @UseGuards(JwtAuthGuard)

@@ -12,11 +12,13 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist:true,
-      forbidNonWhitelisted : true,
-      transform:true,
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
     await app.init();
   });
 
@@ -27,80 +29,68 @@ describe('AppController (e2e)', () => {
       .expect('Welcom to my Movie API');
   });
 
-  describe("/board", ()=>{
-    it('GET', ()=>{
-      return request(app.getHttpServer())
-        .get('/movies')
-        .expect(200)
-        .expect([])
-    })
-    
-    it('POST 201', ()=>{
+  describe('/board', () => {
+    it('GET', () => {
+      return request(app.getHttpServer()).get('/movies').expect(200).expect([]);
+    });
+
+    it('POST 201', () => {
       return request(app.getHttpServer())
         .post('/movies')
         .send({
-          title : 'test movie',
-          year : 2020,
-          genres : ["test"]
+          title: 'test movie',
+          year: 2020,
+          genres: ['test'],
         })
-        .expect(201)
-    })
+        .expect(201);
+    });
 
-    it('POST 400', ()=>{
+    it('POST 400', () => {
       return request(app.getHttpServer())
         .post('/movies')
         .send({
-          title : 'test movie',
-          year : 2020,
-          genres : ["test"],
-          other : 'things'
+          title: 'test movie',
+          year: 2020,
+          genres: ['test'],
+          other: 'things',
         })
-        .expect(400)
-    })
+        .expect(400);
+    });
+  });
 
-  })
-
-  describe('/board/:id', ()=>{
-    it('GET 200', ()=>{
-      return request(app.getHttpServer())
-        .get('/movies/1')
-        .expect(200);
+  describe('/board/:id', () => {
+    it('GET 200', () => {
+      return request(app.getHttpServer()).get('/movies/1').expect(200);
     });
 
-    it('GET 404', ()=>{
-      return request(app.getHttpServer())
-        .get('/movies/999')
-        .expect(404);
+    it('GET 404', () => {
+      return request(app.getHttpServer()).get('/movies/999').expect(404);
     });
 
-    it('PATCH 201', ()=>{
+    it('PATCH 201', () => {
       return request(app.getHttpServer())
         .patch('/movies/1')
         .send({
-          title : 'updated test title'
+          title: 'updated test title',
         })
-        .expect(200)
+        .expect(200);
     });
 
-    it('PATCH 404', ()=>{
+    it('PATCH 404', () => {
       return request(app.getHttpServer())
         .patch('/movies/999')
         .send({
-          title : 'updated test title'
+          title: 'updated test title',
         })
-        .expect(404)
+        .expect(404);
     });
 
-    it('DELETE 200', () =>{
-      return request(app.getHttpServer())
-      .delete('/movies/1')
-      .expect(200);
-    })    
+    it('DELETE 200', () => {
+      return request(app.getHttpServer()).delete('/movies/1').expect(200);
+    });
 
-    it('DELETE 404', ()=>{
-      return request(app.getHttpServer())
-        .delete('/movies/999')
-        .expect(404);
-    })
-  })
+    it('DELETE 404', () => {
+      return request(app.getHttpServer()).delete('/movies/999').expect(404);
+    });
+  });
 });

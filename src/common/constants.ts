@@ -1,5 +1,5 @@
 export const jwtConstants = {
-  secret: 'secretKey',
+  secret: 'Qtm4VmxWea',
 };
 
 export const bcryptConstant = {

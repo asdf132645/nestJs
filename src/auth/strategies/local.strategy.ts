@@ -12,9 +12,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(userId: string, password: string): Promise<any> {
+  async validate(id: string, password: string): Promise<any> {
     const loginUserDto: LoginUserDto = {
-      userId: userId,
+      userId: id,
       password: password,
     };
 

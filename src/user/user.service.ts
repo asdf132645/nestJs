@@ -7,6 +7,7 @@ import {
   CacheInterceptor,
   Inject,
   InternalServerErrorException,
+  HttpException,
 } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -43,9 +44,9 @@ export class UserService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async setCurrentRefreshToken(refreshToken: string, id: number) {
+  async setCurrentRefreshToken(refreshToken: string, user: any) {
     const currentHashedRefreshToken = await hash(refreshToken, 10);
-    await this.userRepository.update(id, { currentHashedRefreshToken });
+    await this.userRepository.update(user, { currentHashedRefreshToken });
   }
 
   async removeRefreshToken(id: number) {
@@ -54,10 +55,9 @@ export class UserService {
     });
   }
 
-
   async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
-    const user = await this.findOne(id);
-
+    const user = await this.getById(id);
+    console.log(user);
     const isRefreshTokenMatching = await compare(
       refreshToken,
       user.currentHashedRefreshToken,
@@ -66,6 +66,17 @@ export class UserService {
     if (isRefreshTokenMatching) {
       return user;
     }
+  }
+
+  async getById(id: string) {
+    const user = await this.userRepository.findOne({
+      userId: id,
+    });
+    console.log(id);
+    if (user) {
+      return user;
+    }
+    throw new HttpException('없는 아이디입니다.', HttpStatus.NOT_FOUND);
   }
 
   // SMS 인증 위한 시그니쳐 생성 로직

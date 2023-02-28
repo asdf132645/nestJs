@@ -34,8 +34,15 @@ export class AuthService {
     };
   }
 
-  getCookieWithJwtRefreshToken(id: number) {
-    const payload = { id };
+  getCookieWithJwtRefreshToken(user: any) {
+    const payload = {
+      userId: user.userId,
+      userName: user.userName,
+      seq: user.seq,
+      role: user.role,
+      accountNumber: user.accountNumber,
+      accountName: user.accountName,
+    };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: `${this.configService.get(
@@ -54,8 +61,15 @@ export class AuthService {
     };
   }
 
-  getCookieWithJwtAccessToken(id: number) {
-    const payload = { id };
+  getCookieWithJwtAccessToken(user: any) {
+    const payload = {
+      userId: user.userId,
+      userName: user.userName,
+      seq: user.seq,
+      role: user.role,
+      accountNumber: user.accountNumber,
+      accountName: user.accountName,
+    };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: `${this.configService.get(
@@ -78,6 +92,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       userId: loginUserDto.userId,
     });
+    console.log('user')
 
     if (!user) {
       // throw new ForbiddenException({
@@ -106,10 +121,12 @@ export class AuthService {
   async login(user: any) {
     // console.log(user === undefined);
     const payload = {
+      seq: user.seq,
       userId: user.userId,
       userName: user.userName,
-      seq: user.seq,
       role: user.role,
+      accountNumber: user.accountNumber,
+      accountName: user.accountName,
     };
     if (user === 500) {
       return new ResponseMessage()
