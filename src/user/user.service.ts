@@ -234,6 +234,20 @@ export class UserService {
     );
   }
 
+  myPage(id: string): Promise<User> {
+    return this.userRepository.findOne(
+      { userId: id },
+      {
+        // 검색할 열을 지정
+        select: [
+          'userId',
+          'userName',
+          'role',
+        ],
+      },
+    );
+  }
+
   async remove(id: string): Promise<void> {
     await this.userRepository.delete(id);
   }

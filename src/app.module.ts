@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { ProfileModule } from  './profile/profile.module';
+import { OrderModule } from './order/order.module'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -15,6 +16,7 @@ import Joi from 'joi';
   imports: [
     AuthModule,
     UserModule,
+    OrderModule,
     ProfileModule,
     TypeOrmModule.forRoot(),
     // ConfigModule.forRoot({ envFilePath: `${process.env.NODE_ENV}.env` }),

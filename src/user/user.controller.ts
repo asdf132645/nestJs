@@ -63,6 +63,11 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @Post('myPage')
+  myPage(@Body() id:string): Promise<User> {
+    return this.userService.myPage(id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(id);
