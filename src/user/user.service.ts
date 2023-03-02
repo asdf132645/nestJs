@@ -21,6 +21,7 @@ import axios from 'axios';
 import * as crypto from 'crypto';
 import { Response, ResponseMessage } from '../response.util';
 import { compare, hash } from 'bcrypt';
+import { Order } from "../order/order.entity";
 
 // const ACCESS_KEY_ID = process.env.NAVER_ACCESS_KEY_ID;
 // const SECRET_KEY = process.env.NAVER_SECRET_KEY;
@@ -39,6 +40,8 @@ interface SMS {
 @UseInterceptors(CacheInterceptor)
 export class UserService {
   constructor(
+    // @InjectRepository(Order)
+    // private orderRepository: Repository<Order>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -50,7 +53,7 @@ export class UserService {
   }
 
   async removeRefreshToken(user: any) {
-    console.log(user)
+    // console.log(user)
     return this.userRepository.update(user, {
       currentHashedRefreshToken: null,
     });
@@ -58,7 +61,7 @@ export class UserService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
     const user = await this.getById(id);
-    console.log(user);
+    // console.log(user);
     const isRefreshTokenMatching = await compare(
       refreshToken,
       user.currentHashedRefreshToken,
@@ -70,6 +73,9 @@ export class UserService {
   }
 
   async getById(id: string) {
+    // const order = this.orderRepository
+    //   .createQueryBuilder("order");
+
     const user = await this.userRepository.findOne({
       userId: id,
     });
@@ -82,7 +88,7 @@ export class UserService {
 
   // SMS 인증 위한 시그니쳐 생성 로직
   makeSignitureForSMS = (): string => {
-    console.log(process.env.NAVER_SMS_SERVICE_ID);
+    // console.log(process.env.NAVER_SMS_SERVICE_ID);
     const message = [];
     const hmac = crypto.createHmac(
       'sha256',
@@ -158,7 +164,7 @@ export class UserService {
         return '';
       })
       .catch((err) => {
-        // console.error(err.response.data);
+        console.error(err);
         // return err;
         throw new ForbiddenException({
           statusCode: HttpStatus.FORBIDDEN,

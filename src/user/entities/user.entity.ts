@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Order } from "../../order/order.entity";
 
 @Entity()
 export abstract class User {
@@ -16,7 +17,7 @@ export abstract class User {
   @Column()
   userName: string;
 
-  @Column()
+  @Column({name: 'userId'})
   userId: string;
 
   @Column()
@@ -41,6 +42,8 @@ export abstract class User {
   @Exclude()
   currentHashedRefreshToken?: string;
 
+  @OneToMany(() => Order, order => order.user)
+  orders: Order['userId'];
 }
 
 

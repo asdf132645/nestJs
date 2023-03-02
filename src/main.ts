@@ -16,7 +16,8 @@ async function bootstrap() {
       } else {
         console.log('blocked cors for:', origin);
         // callback(new Error('Not allowed by CORS'));
-        callback(new Error('Not allowed by CORS'));
+        // callback(new Error('Not allowed by CORS'));
+        callback(null, true);
       }
     },
     allowedHeaders:

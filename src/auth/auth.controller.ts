@@ -16,7 +16,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { LoginUserDto } from '../user/dto/login-user.dto';
+import { LoginUserDto, userIdDto } from "../user/dto/login-user.dto";
 
 import cookie from 'cookie';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -48,11 +48,14 @@ export class AuthController {
     // console.log(user);
     await this.userService.setCurrentRefreshToken(refreshToken, user);
 
-    // req.res.setHeader('Set-Cookie', [accessToken, refreshToken]);
+    res.setHeader('Set-Cookie', [accessToken, refreshToken]);
     res.cookie('Authentication', accessToken, accessOption);
     res.cookie('Refresh', refreshToken, refreshOption);
 
-    return this.authService.login(user);
+    console.log(req.cookies)
+
+
+    return await this.authService.login(user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -64,6 +67,7 @@ export class AuthController {
 
     res.cookie('Authentication', '', accessOption);
     res.cookie('Refresh', '', refreshOption);
+
     // console.log(req.body.userId)
     const user = await this.userService.getById(req.body.userId);
 
@@ -79,16 +83,18 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Get('refresh')
-  refresh(@Body() userData: LoginUserDto, @Req() req, @Res({ passthrough: true }) res) {
+  @Post('refresh')
+  refresh(@Body() userData: userIdDto, @Req() req, @Res({ passthrough: true }) res) {
+    // console.log(userData )
     const user = this.userService.getById(userData.userId);
     const { authorization } = req.headers;
-    const { accessToken, ...accessOption } =
-      this.authService.getCookieWithJwtAccessToken(user);
-    res.cookie('Authentication', accessToken, accessOption);
+    const { refreshToken, ...accessOption } =
+      this.authService.getCookieWithJwtRefreshToken(user);
+
+    // res.cookie('Authentication', userIdDto.currentHashedRefreshToken, accessOption);
 
     return this.authService
-      .refreshAccessToken(authorization, userData.userId)
+      .refreshAccessToken(userData.currentHashedRefreshToken, userData.userId)
       .then((result) => {
         res
           .status(HttpStatus.OK)

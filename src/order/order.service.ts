@@ -6,6 +6,7 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import * as bcrypt from "bcrypt";
 import { bcryptConstant } from "../common/constants";
 import { CheckService, CreateOrderDto } from "./dto/createdOrder";
+import { User } from "../user/entities/user.entity";
 
 @Injectable()
 export class OrderService {
@@ -29,7 +30,14 @@ export class OrderService {
 
   async getOrderData(checkService: CheckService): Promise<any> {
     const userid = checkService.userID;
-    console.log(checkService.companyID)
+    // console.log(checkService.companyID)
+    await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect("order.user", "user")
+      .getMany();
+
+
+
     return await this.orderRepository
       .createQueryBuilder('order')
       .select("order")
@@ -51,6 +59,15 @@ export class OrderService {
     // })
 
 
+  }
+
+  async leftJoin(id:string) : Promise<any>{
+    // console.log()
+    return  this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.user", "user")
+      .getMany();
+    // return this.orderRepository.findOne({ userId: id }, { relations: ["user"] });
   }
 
 }
