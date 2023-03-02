@@ -16,11 +16,11 @@ async function bootstrap() {
       } else {
         console.log('blocked cors for:', origin);
         // callback(new Error('Not allowed by CORS'));
-        callback(null, true);
+        callback(new Error('Not allowed by CORS'));
       }
     },
     allowedHeaders:
-      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
+      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe, Authorization',
     methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
     credentials: true,
   });
