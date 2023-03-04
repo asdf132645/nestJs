@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { OrderService } from "./order.service";
 import { CheckService, CreateOrderDto } from "./dto/createdOrder";
 
@@ -15,7 +15,13 @@ export class OrderController {
   //서비스 조회
   @Post('checkService')
   checkService(@Body() checkService: CheckService): Promise<any> {
-    console.log(checkService)
+    // console.log(checkService)
     return this.orderService.getOrderData(checkService);
+  }
+
+  @Post('orders')
+  leftJoin(@Body() createOrderDto: CreateOrderDto): Promise<any>{
+    // console.log(createOrderDto.userId)
+   return this.orderService.leftJoin(createOrderDto.userId);
   }
 }

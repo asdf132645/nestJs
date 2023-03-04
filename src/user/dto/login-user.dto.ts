@@ -8,3 +8,12 @@ export class LoginUserDto {
   password: string;
 
 }
+
+export class userIdDto {
+  @IsString()
+  userId: string;
+
+  @IsString()
+  currentHashedRefreshToken: string;
+
+}

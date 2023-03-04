@@ -8,15 +8,15 @@ import {
   UseGuards,
   Response,
   Request,
-  Body,
-} from '@nestjs/common';
+  Body, HttpStatus
+} from "@nestjs/common";
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserService } from '../user/user.service';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-import { LoginUserDto } from '../user/dto/login-user.dto';
+import { LoginUserDto, userIdDto } from "../user/dto/login-user.dto";
 
 import cookie from 'cookie';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -48,39 +48,88 @@ export class AuthController {
     // console.log(user);
     await this.userService.setCurrentRefreshToken(refreshToken, user);
 
-    // req.res.setHeader('Set-Cookie', [accessToken, refreshToken]);
+    res.setHeader('Set-Cookie', [accessToken, refreshToken]);
     res.cookie('Authentication', accessToken, accessOption);
     res.cookie('Refresh', refreshToken, refreshOption);
 
-    return this.authService.login(user);
+    console.log(req.cookies)
+
+
+    return await this.authService.login(user);
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('logout') // async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
-  async logout(@Req() req, @Res() res): Promise<any> {
+  async logout(@Req() req, @Res({ passthrough: true }) res): Promise<any> {
+
     const { accessOption, refreshOption } =
       this.authService.getCookiesForLogOut();
 
-    await this.userService.removeRefreshToken(req.user.id);
-
     res.cookie('Authentication', '', accessOption);
     res.cookie('Refresh', '', refreshOption);
+
+    // console.log(req.body.userId)
+    const user = await this.userService.getById(req.body.userId);
+
+    await this.userService.removeRefreshToken(user);
+    // console.log(req)
+    return  new ResponseMessage()
+      .success()
+      .body({
+        result: '성공',
+        expiresIn: 3600,
+      })
+      .build()
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Get('refresh')
-  refresh(@Req() req, @Res({ passthrough: true }) res) {
-    const user = req.user;
-    const { accessToken, ...accessOption } =
-      this.authService.getCookieWithJwtAccessToken(user.id);
-    res.cookie('Authentication', accessToken, accessOption);
-    return new ResponseMessage()
-      .success()
-      .body({
-        user: user,
-        expiresIn: 3600,
+  @Post('refresh')
+  refresh(@Body() userData: userIdDto, @Req() req, @Res({ passthrough: true }) res) {
+    // console.log(userData )
+    const user = this.userService.getById(userData.userId);
+    const { authorization } = req.headers;
+    const { refreshToken, ...accessOption } =
+      this.authService.getCookieWithJwtRefreshToken(user);
+
+    // res.cookie('Authentication', userIdDto.currentHashedRefreshToken, accessOption);
+
+    return this.authService
+      .refreshAccessToken(userData.currentHashedRefreshToken, userData.userId)
+      .then((result) => {
+        res
+          .status(HttpStatus.OK)
+          .json(
+            new ResponseMessage()
+              .success()
+              .body({
+                result: result,
+                expiresIn: 3600,
+              })
+              .build()
+          );
       })
-      .build();
+      .catch((e) => {
+        console.log(e);
+        res
+          .status(HttpStatus.OK)
+          .json(
+            new ResponseMessage()
+              .error(
+                404,
+                '리프레시 토큰이 유효하지않습니다..',
+                '리프레시 토큰이 유효하지않습니다..',
+              )
+              .build()
+          );
+      });
+
+    // return new ResponseMessage()
+    //   .success()
+    //   .body({
+    //     user: user,
+    //     expiresIn: 3600,
+    //   })
+    //   .build();
   }
 
   @UseGuards(JwtAuthGuard)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # compiled output
 /dist
 /node_modules
@@ -46,3 +47,10 @@ nest-auth.iml
 .eslintrc.js
 .env
 .dev.env
+=======
+node_modules/
+package.json
+package-lock.json
+dist/
+.idea/
+>>>>>>> f906ec24b19bc55138b1a75484f3878764d792fd

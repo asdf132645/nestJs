@@ -1,4 +1,14 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn
+} from "typeorm";
+import { User } from "../user/entities/user.entity";
 
 @Entity()
 export abstract class Order {
@@ -11,7 +21,7 @@ export abstract class Order {
   @Column()
   status: string;
 
-  @Column()
+  @Column({name: 'userId'})
   userId:string;
 
   @Column()
@@ -33,5 +43,7 @@ export abstract class Order {
   @CreateDateColumn()
   createdAt: Date;
 
+  @ManyToOne(() => User, user => user.orders)
+  user: User;
 
 }
