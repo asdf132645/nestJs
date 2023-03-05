@@ -33,12 +33,12 @@ export class ResponseMessage {
     return this.msg;
   }
 
-  public build(): Response {
-    return new Response(this);
+  public build(): ResponseData {
+    return new ResponseData(this);
   }
 }
 
-export class Response {
+export class ResponseData {
   data: any | any[];
   code: number;
   msg: string;

@@ -2,7 +2,7 @@ import { IsString } from "class-validator";
 
 export class LoginUserDto {
   @IsString()
-  userId: string;
+  user_id: string;
 
   @IsString()
   password: string;
@@ -11,7 +11,7 @@ export class LoginUserDto {
 
 export class userIdDto {
   @IsString()
-  userId: string;
+  user_id: string;
 
   @IsString()
   currentHashedRefreshToken: string;

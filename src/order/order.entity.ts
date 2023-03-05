@@ -43,7 +43,5 @@ export abstract class Order {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, user => user.orders)
-  user: User;
 
 }

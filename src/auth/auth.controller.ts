@@ -38,7 +38,7 @@ export class AuthController {
   ) {
     // console.log(this.authService.login(req.user))
 
-    const user = await this.userService.getById(userData.userId);
+    const user = await this.userService.getById(userData.user_id);
     // console.log(user);
     const { accessToken, ...accessOption } =
       this.authService.getCookieWithJwtAccessToken(user);
@@ -52,7 +52,7 @@ export class AuthController {
     res.cookie('Authentication', accessToken, accessOption);
     res.cookie('Refresh', refreshToken, refreshOption);
 
-    console.log(req.cookies)
+    // console.log(req.cookies)
 
 
     return await this.authService.login(user);
@@ -68,8 +68,8 @@ export class AuthController {
     res.cookie('Authentication', '', accessOption);
     res.cookie('Refresh', '', refreshOption);
 
-    // console.log(req.body.userId)
-    const user = await this.userService.getById(req.body.userId);
+    console.log(req)
+    const user = await this.userService.getById(req.body.user_id);
 
     await this.userService.removeRefreshToken(user);
     // console.log(req)
@@ -86,7 +86,7 @@ export class AuthController {
   @Post('refresh')
   refresh(@Body() userData: userIdDto, @Req() req, @Res({ passthrough: true }) res) {
     // console.log(userData )
-    const user = this.userService.getById(userData.userId);
+    const user = this.userService.getById(userData.user_id);
     const { authorization } = req.headers;
     const { refreshToken, ...accessOption } =
       this.authService.getCookieWithJwtRefreshToken(user);
@@ -94,7 +94,7 @@ export class AuthController {
     // res.cookie('Authentication', userIdDto.currentHashedRefreshToken, accessOption);
 
     return this.authService
-      .refreshAccessToken(userData.currentHashedRefreshToken, userData.userId)
+      .refreshAccessToken(userData.currentHashedRefreshToken, userData.user_id)
       .then((result) => {
         res
           .status(HttpStatus.OK)
@@ -102,8 +102,11 @@ export class AuthController {
             new ResponseMessage()
               .success()
               .body({
-                result: result,
-                expiresIn: 3600,
+                refresh: {
+                  token: result,
+                  expiresIn: 86400,
+                },
+
               })
               .build()
           );

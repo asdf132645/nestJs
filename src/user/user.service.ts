@@ -19,9 +19,13 @@ import * as bcrypt from 'bcrypt';
 import { bcryptConstant } from '../common/constants';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import { Response, ResponseMessage } from '../response.util';
+import { ResponseData, ResponseMessage } from '../response.util';
 import { compare, hash } from 'bcrypt';
 import { Order } from "../order/order.entity";
+import { uploadFileURL } from "../utils/multer.options";
+import * as fs from 'fs';
+import { extname } from "path";
+
 
 // const ACCESS_KEY_ID = process.env.NAVER_ACCESS_KEY_ID;
 // const SECRET_KEY = process.env.NAVER_SECRET_KEY;
@@ -77,7 +81,7 @@ export class UserService {
     //   .createQueryBuilder("order");
 
     const user = await this.userRepository.findOne({
-      userId: id,
+      user_id: id,
     });
     console.log(id);
     if (user) {
@@ -189,7 +193,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto): Promise<any> {
     const isExist = await this.userRepository.findOne({
-      userId: createUserDto.userId,
+      user_id: createUserDto.user_id,
     });
     if (isExist) {
       throw new ForbiddenException({
@@ -214,8 +218,7 @@ export class UserService {
   async findAll(): Promise<User[]> {
     return this.userRepository.find({
       select: [
-        'seq',
-        'userId',
+        'user_id',
         'userName',
         'role',
         'accountNumber',
@@ -226,12 +229,11 @@ export class UserService {
 
   findOne(id: string): Promise<User> {
     return this.userRepository.findOne(
-      { userId: id },
+      { user_id: id },
       {
         // 검색할 열을 지정
         select: [
-          'seq',
-          'userId',
+          'user_id',
           'userName',
           'role',
           'accountNumber',
@@ -243,11 +245,11 @@ export class UserService {
 
   myPage(id: string): Promise<User> {
     return this.userRepository.findOne(
-      { userId: id },
+      { user_id: id },
       {
         // 검색할 열을 지정
         select: [
-          'userId',
+          'user_id',
           'userName',
           'role',
         ],
@@ -260,7 +262,7 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
-    const isExist = await this.userRepository.findOne({ userId: id });
+    const isExist = await this.userRepository.findOne({ user_id: id });
     if (!isExist) {
       throw new ForbiddenException({
         statusCode: HttpStatus.FORBIDDEN,
@@ -275,5 +277,81 @@ export class UserService {
       );
     }
     await this.userRepository.update(id, updateUserDto);
+  }
+
+  /**
+   * @author Ryan
+   * @description 디스크 방식 파일 업로드 (1)
+   *
+   * @param files 파일 데이터
+   * @returns {String[]} 파일 경로
+   */
+  uploadFileDisk(files: File[]): string[] {
+    return files.map((file: any) => {
+      //파일 이름 반환
+      return uploadFileURL(file.filename);
+    });
+  }
+
+  /**
+   * @author Ryan
+   * @description 디스크 방식 파일 업로드 (2)
+   *
+   * @param user_id 유저 아이디
+   * @param files 파일 데이터
+   * @returns {String[]} 파일 경로
+   */
+  uploadFileDiskDestination(userId: string, files: File[]): string[] {
+    //유저별 폴더 생성
+    const uploadFilePath = `uploads/${userId}`;
+
+    if (!fs.existsSync(uploadFilePath)) {
+      // uploads 폴더가 존재하지 않을시, 생성합니다.
+      fs.mkdirSync(uploadFilePath);
+    }
+    return files.map((file: any) => {
+      //파일 이름
+      const fileName = Date.now() + extname(file.originalname);
+      //파일 업로드 경로
+      const uploadPath =
+        __dirname + `/../../${uploadFilePath + '/' + fileName}`;
+
+      //파일 생성
+      fs.writeFileSync(uploadPath, file.path); // file.path 임시 파일 저장소
+
+      return uploadFileURL(uploadFilePath + '/' + fileName);
+    });
+  }
+
+  /**
+   * @author Ryan
+   * @description 메모리 방식 파일 업로드
+   *
+   * @param userId 유저 아이디
+   * @param files 파일 데이터
+   * @returns {String[]} 파일 경로
+   */
+  uploadFileMemory(userId: string, files: File[]): any {
+    //유저별 폴더 생성
+    const uploadFilePath = `uploads/${userId}`;
+
+    if (!fs.existsSync(uploadFilePath)) {
+      // uploads 폴더가 존재하지 않을시, 생성합니다.
+      fs.mkdirSync(uploadFilePath);
+    }
+
+    return files.map((file: any) => {
+      //파일 이름
+      const fileName = Date.now() + extname(file.originalname);
+      //파일 업로드 경로
+      const uploadPath =
+        __dirname + `/../../${uploadFilePath + '/' + fileName}`;
+
+      //파일 생성
+      fs.writeFileSync(uploadPath, file.buffer);
+
+      //업로드 경로 반환
+      return uploadFileURL(uploadFilePath + '/' + fileName);
+    });
   }
 }

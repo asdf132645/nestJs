@@ -37,9 +37,9 @@ export class AuthService {
 
   getCookieWithJwtRefreshToken(user: any) {
     const payload = {
-      userId: user.userId,
+      user_id: user.user_id,
       userName: user.userName,
-      seq: user.seq,
+      // id: user.seq,
       role: user.role,
       accountNumber: user.accountNumber,
       accountName: user.accountName,
@@ -64,9 +64,9 @@ export class AuthService {
 
   getCookieWithJwtAccessToken(user: any) {
     const payload = {
-      userId: user.userId,
+      user_id: user.user_id,
       userName: user.userName,
-      seq: user.seq,
+      // seq: user.seq,
       role: user.role,
       accountNumber: user.accountNumber,
       accountName: user.accountName,
@@ -91,7 +91,7 @@ export class AuthService {
 
   async validateUser(loginUserDto: LoginUserDto): Promise<any> {
     const user = await this.userRepository.findOne({
-      userId: loginUserDto.userId,
+      user_id: loginUserDto.user_id,
     });
     // console.log('user');
 
@@ -126,14 +126,15 @@ export class AuthService {
   async login(user: any) {
     // console.log(user === undefined);
     const payload = {
-      seq: user.seq,
-      userId: user.userId,
+      // seq: user.seq,
+      user_id: user.user_id,
       userName: user.userName,
       role: user.role,
       accountNumber: user.accountNumber,
       accountName: user.accountName,
       // refreshToken: user.currentHashedRefreshToken,
     };
+    console.log(payload)
     if (user === 500) {
       return new ResponseMessage()
         .error(
@@ -154,10 +155,18 @@ export class AuthService {
       return new ResponseMessage()
         .success()
         .body({
-          accessToken: this.jwtService.sign(payload),
+          access:{accessToken: this.jwtService.sign(payload),expiresIn: 3600,},
           role: payload.role,
-          expiresIn: 3600,
-          refreshToken: user.currentHashedRefreshToken,
+          refresh:{
+            refreshToken: this.jwtService.sign( payload, {
+              secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+              expiresIn: `${this.configService.get(
+                'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+              )}s`,
+            }),
+            expiresIn:86400,
+          },
+
         })
         .build();
     }
@@ -170,7 +179,7 @@ export class AuthService {
 
   async validateAccessToken(accessToken: string, userId: string) {
     const user = await this.userRepository.findOne({
-      userId: userId,
+      user_id: userId,
     });
 
     // if (!user.isActive) {
@@ -197,14 +206,14 @@ export class AuthService {
     if (betweenTime < 3) {
       // refreshToken 통신 유도
       return {
-        userId: user.userId,
+        user_id: user.user_id,
         isAuth: true,
         isRefresh: true,
       };
     }
 
     return {
-      userId: user.userId,
+      user_id: user.user_id,
       isAuth: true,
       isRefresh: false,
     };
@@ -215,24 +224,24 @@ export class AuthService {
       ? process.env.JWT_REFRESH_TOKEN_SECRET
       : 'dev';
     const refreshToken = authorization.replace('Bearer ', '');
-    // const verify = this.jwtService.verify(authorization, { secret: secretKey });
-    // refreshToken 만료 안된경우 accessToken 새로 발급
-    // if (verify) {
+    const verify = this.jwtService.verify(refreshToken, { secret: secretKey });
+    //refreshToken 만료 안된경우 accessToken 새로 발급
+    if (verify) {
       const user = await this.userRepository.findOne({
-        userId: userId,
+        user_id: userId,
       });
       // console.log(user)
       const payload = {
-        userId: user.userId,
+        userId: user.user_id,
         userName: user.userName,
-        seq: user.seq,
+        // seq: user.seq,
         role: user.role,
         accountNumber: user.accountNumber,
         accountName: user.accountName,
       };
       // db에 저장된 토  큰과 비교
 
-      // if (user.currentHashedRefreshToken == authorization) {
+      if (user.currentHashedRefreshToken == authorization) {
         const token = this.jwtService.sign(payload, {
           secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
           expiresIn: `${this.configService.get(
@@ -242,9 +251,10 @@ export class AuthService {
         return {
           token: token,
           isAuth: true,
+
         };
-      // }
-    // }
+      }
+    }
 
     // return {
     //   isAuth: false,

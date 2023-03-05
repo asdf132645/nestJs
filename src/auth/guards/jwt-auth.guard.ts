@@ -31,6 +31,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const verify = this.jwtService.verify(token, { secret: secretKey });
       return verify;
     } catch (e) {
+      console.log(e.message)
       switch (e.message) {
         // 토큰에 대한 오류를 판단합니다.
         case 'INVALID_TOKEN':
