@@ -70,17 +70,17 @@ export class ReviewsController {
     }
 
     const {
-      videoList,
+      companyList,
       resultUserReview,
     } = await this.reviewsService.findThisVidAndUserReview(company, myuser);
-    let totalCount = videoList.length;
+    let totalCount = companyList.length;
     if (resultUserReview) {
       totalCount++;
     }
 
     return Object.assign({
       totalCount,
-      reviewList: videoList.slice(8 * (page - 1), 8 * page),
+      reviewList: companyList.slice(8 * (page - 1), 8 * page),
       myReview: resultUserReview || null,
     });
   }

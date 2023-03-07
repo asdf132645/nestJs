@@ -5,15 +5,45 @@ import { Repository } from "typeorm";
 import { createdCompanyDto } from "./dto/createdCompany";
 import { Review } from '../review/Review.entity';
 import { ResponseMessage } from "../response.util";
+import { User } from "../user/entities/user.entity";
+import { ReviewsService } from "../review/reviews.service";
 
 @Injectable()
 export class CompanyService {
   constructor(
     @InjectRepository(CompanyInformation) private companyRepository: Repository<CompanyInformation>,
     @InjectRepository(Review) private reviewRepository: Repository<Review>,
+    private reviewsService: ReviewsService,
   ) {
     this.companyRepository = companyRepository;
     this.reviewRepository = reviewRepository;
+    this.reviewsService = reviewsService;
+  }
+
+  async findAllCompany() {
+    const companyList = await this.companyRepository
+      .createQueryBuilder('company')
+      .getRawMany();
+
+    // console.log(companyList);
+    const companyListVar = [];
+    if (companyList.length) {
+      for (const rawCompany of companyList) {
+        const avgRating = await this.reviewsService.getThisVidReviewAvgRate(
+          rawCompany.company_id,
+        );
+        companyListVar.push({
+          company_name: rawCompany.company_company_name,
+          companyDescription: rawCompany.company_companyDescription,
+          company_companyDetails: rawCompany.company_companyDetails,
+          company_detail_address: rawCompany.company_detail_address,
+          imgUrl: rawCompany.company_url,
+          rating: avgRating,
+          companyGoPageNum: rawCompany.company_companyGoPageNum
+        })
+      }
+    }
+    return companyListVar;
   }
 
   async addThisCompany(newCompany: createdCompanyDto) {
@@ -29,6 +59,7 @@ export class CompanyService {
     company.business_number = newCompany.business_number;
     company.address = newCompany.address;
     company.detail_address = newCompany.detail_address;
+    company.url = newCompany.url;
     await this.companyRepository.save(company);
     return new ResponseMessage().success().body({
       success: true,
@@ -45,37 +76,18 @@ export class CompanyService {
   }
 
   async getLessReviewVid() {
-    const videoList = await this.companyRepository
+    const companyList = await this.companyRepository
       .createQueryBuilder('company')
       .select('company.id')
       .addSelect('COUNT(review.id) as count')
-      .leftJoin('video.reviews', 'review')
+      .leftJoin('company.reviews', 'review')
       .groupBy('company.id')
       .orderBy('count')
       .limit(5)
       .getRawMany();
 
-    console.log(videoList);
 
-    return videoList;
-  }
-
-  async getUserCompany(userId: string) {
-    const reviews = await this.reviewRepository
-      .createQueryBuilder('review')
-      .leftJoinAndSelect('review.user', 'user')
-      .leftJoinAndSelect('review.video', 'video')
-      .getMany();
-
-    const myVideoBox = [];
-    for (const review of reviews) {
-      if (review.user.id === userId) {
-        delete review.user;
-        myVideoBox.push(review.company);
-      }
-    }
-
-    return myVideoBox;
+    return companyList;
   }
 
   async getManyReviewVid() {
@@ -91,6 +103,26 @@ export class CompanyService {
 
     return companyList;
   }
+
+  async getUserCompany(userId: string) {
+    const reviews = await this.reviewRepository
+      .createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .leftJoinAndSelect('review.company', 'company')
+      .getMany();
+
+    const myCompanyBox = [];
+    for (const review of reviews) {
+      if (review.user.id === userId) {
+        delete review.user;
+        myCompanyBox.push(review.company);
+      }
+    }
+
+    return myCompanyBox;
+  }
+
+
 
   async getTop5ReviewVid() {
     const companyList = await this.companyRepository

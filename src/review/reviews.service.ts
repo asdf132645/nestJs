@@ -120,7 +120,7 @@ export class ReviewsService {
     //   .orderBy('review.createdAt', 'DESC')
     //   .getMany();
 
-    const rawVideoList = await this.reviewRepository
+    const rawCompanyList = await this.reviewRepository
       .createQueryBuilder('review')
       // .select('*')
       // // .select('review.video')
@@ -151,8 +151,8 @@ export class ReviewsService {
     const userReview = await this.reviewRepository.findOne({ user, company });
     const companyList = [];
 
-    if (rawVideoList.length) {
-      for (const rawReview of rawVideoList) {
+    if (rawCompanyList.length) {
+      for (const rawReview of rawCompanyList) {
         const review = await this.reviewRepository.findOne({
           id: rawReview.review_id,
         });
@@ -172,18 +172,18 @@ export class ReviewsService {
           createdAt: rawReview.review_createdAt,
           updatedAt: rawReview.review_updatedAt,
           user: reviewUser,
-          videoId: rawReview.review_videoId,
+          companyId: rawReview.review_companyId,
           likeCount,
           isLike,
         });
       }
     } else {
-      return { videoList: companyList, userReview: null };
+      return { companyList: companyList, userReview: null };
     }
 
     if (!userReview) {
       return {
-        videoList: companyList,
+        companyList: companyList,
         userReview: null,
       };
     }
@@ -193,7 +193,7 @@ export class ReviewsService {
       likeCount: await this.likeRepository.count({ review: userReview }),
       isLike: await this.likeRepository.count({ user, review: userReview }),
     };
-    return { videoList: companyList, resultUserReview };
+    return { companyList: companyList, resultUserReview };
   }
 
   async saveReview(user: User, company: CompanyInformation, req: ReviewDto) {

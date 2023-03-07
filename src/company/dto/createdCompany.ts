@@ -35,6 +35,9 @@ export class createdCompanyDto {
   detail_address: string;
 
   @IsString()
+  url: string;
+
+  @IsString()
   updatedAt: Date;
 
   @IsString()
@@ -46,4 +49,7 @@ export class createdCompanyDto {
 
   @OneToMany(() => Review, (review) => review.company, { cascade: true })
   reviews: Review[];
+
+  @IsString()
+  companyGoPageNum: string;
 }

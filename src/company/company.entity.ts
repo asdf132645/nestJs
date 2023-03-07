@@ -85,6 +85,20 @@ export class CompanyInformation extends BaseEntity {
   })
   detail_address: string;
 
+  @Column({
+    type: 'text',
+    comment: '이미지 url',
+  })
+  url: string;
+
+  @Column({
+    type: 'text',
+    comment: '회사 상세페이지 넘버',
+  })
+  companyGoPageNum: string;
+
+
+
   @CreateDateColumn({ name: 'create_at', comment: '생성일' })
   createdAt: Date;
 

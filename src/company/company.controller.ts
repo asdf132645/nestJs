@@ -17,6 +17,8 @@ import { UserService } from "../user/user.service";
 import { TokenService } from '../auth/token.service';
 import { ResponseMessage } from "../response.util";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { User } from "../user/entities/user.entity";
+import { CompanyInformation } from "./company.entity";
 
 @Controller("company")
 export class CompanyController {
@@ -69,23 +71,25 @@ export class CompanyController {
       });
     }
 
-    const videoList2 = await this.companyService.getLessReviewVid();
+
+    const companyList2 = await this.companyService.getLessReviewVid();
     const less5ReviewVidBox = [];
-    for (const video of videoList2) {
+    for (const company of companyList2) {
       const lowVid = await this.companyService.getThisComWithId(
-        video.video_id,
+        company.company_id,
       );
       const avgRating = await this.reviewsService.getThisVidReviewAvgRate(
-        video.video_id,
+        company.company_id,
       );
       less5ReviewVidBox.push({
         ...lowVid,
         rating: avgRating,
       });
     }
-    const videoList3 = await this.companyService.getTop5ReviewVid();
+
+    const companyList3 = await this.companyService.getTop5ReviewVid();
     const top5ReviewVidBox = [];
-    for (const company of videoList3) {
+    for (const company of companyList3) {
       const topVid = await this.companyService.getThisComWithId(company.id);
       const avgRating = await this.reviewsService.getThisVidReviewAvgRate(
         company.id,
@@ -96,14 +100,27 @@ export class CompanyController {
       });
     }
 
+    const companyListMain =  await this.companyService.findAllCompany();
+    const listMain = [];
+    for (const company of companyListMain){
+      listMain.push(company)
+    }
+
+
+    // console.log(this.companyService.findAllCompany())
     return new ResponseMessage().success().body({
       success: true,
       data: {
-        top5VideoList: top5ReviewVidBox,
-        mostReviewVidList: many5ReviewVidBox,
-        lessReviewVidList: less5ReviewVidBox,
+        companyList: listMain,
+        // top5VideoList: top5ReviewVidBox,
+        // mostReviewVidList: many5ReviewVidBox,
+        // lessReviewVidList: less5ReviewVidBox,
       },
     }).build();
+  }
+  @Get('list')
+  findAll(): Promise<CompanyInformation[]> {
+    return this.companyService.findAllCompany();
   }
 
   // @UseGuards(JwtAuthGuard)
