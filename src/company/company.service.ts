@@ -25,7 +25,7 @@ export class CompanyService {
       .createQueryBuilder('company')
       .getRawMany();
 
-    // console.log(companyList);
+    console.log(companyList);
     const companyListVar = [];
     if (companyList.length) {
       for (const rawCompany of companyList) {
@@ -48,6 +48,7 @@ export class CompanyService {
 
   async addThisCompany(newCompany: createdCompanyDto) {
     const company = new CompanyInformation();
+    const crypto = require("crypto");
 
     company.company_name = newCompany.company_name;
     company.companyDescription = newCompany.companyDescription;
@@ -60,6 +61,7 @@ export class CompanyService {
     company.address = newCompany.address;
     company.detail_address = newCompany.detail_address;
     company.url = newCompany.url;
+    company.companyGoPageNum = "C" + Math.random().toString(36).substring(2, 11);
     await this.companyRepository.save(company);
     return new ResponseMessage().success().body({
       success: true,
