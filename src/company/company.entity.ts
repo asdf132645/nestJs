@@ -24,7 +24,14 @@ export class CompanyInformation extends BaseEntity {
     type: 'varchar',
     comment: '회사 이름',
   })
-  hospital_name: string;
+  company_name: string;
+
+  //length 설정하지 않으면 기본 255 길이 설정
+  @Column({
+    type: 'varchar',
+    comment: '업체설명',
+  })
+  companyDescription: string;
 
   @IsEmail()
   @Column({
@@ -47,9 +54,16 @@ export class CompanyInformation extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 72,
-    comment: '팩스번호',
+    comment: '업체 분류',
   })
-  fax: string;
+  companyType: string;
+
+  @Column({
+    type: 'varchar',
+    length: 700,
+    comment: '업체 상세설명',
+  })
+  companyDetails: string;
 
   @Column({
     type: 'varchar',

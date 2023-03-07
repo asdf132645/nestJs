@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-// import { LikeReview } from './LikeReview.entity';
+import { LikeReview } from './LikeReview.entity';
 import { User } from '../user/entities/user.entity';
 import { CompanyInformation } from "../company/company.entity";
 // import { Video } from './Video.entity';
@@ -23,8 +23,8 @@ export class Review {
   @Column()
   text: string;
 
-  // @OneToMany(() => LikeReview, (like) => like.review, { cascade: true })
-  // likeReview: LikeReview;
+  @OneToMany(() => LikeReview, (like) => like.review, { cascade: true })
+  likeReview: LikeReview;
 
   @ManyToOne(() => User, (user) => user.reviews)
   user: User;

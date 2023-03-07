@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/entities/user.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { TokenService } from "./token.service";
 
 @Module({
   imports: [
@@ -30,8 +31,8 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
     }),
     TypeOrmModule.forFeature([User]),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, TokenService],
+  exports: [AuthService, JwtModule, TokenService],
   controllers: [AuthController],
 })
 export class AuthModule {}

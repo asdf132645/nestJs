@@ -76,6 +76,10 @@ export class UserService {
     }
   }
 
+  async findUserWithUserId(user_id: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { user_id } });
+  }
+
   async getById(id: string) {
     // const order = this.orderRepository
     //   .createQueryBuilder("order");

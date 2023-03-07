@@ -10,6 +10,7 @@ import { Exclude } from 'class-transformer';
 import { Order } from "../../order/order.entity";
 import { CompanyInformation } from '../../company/company.entity';
 import {Review} from "../../review/Review.entity";
+import { LikeReview } from "../../review/LikeReview.entity";
 
 @Entity({ name: 'user' })
 @Unique(['user_id'])
@@ -54,6 +55,8 @@ export abstract class User {
   @DeleteDateColumn({ name: 'delete_at', comment: '삭제일' })
   deletedAt?: Date | null;
 
+  @OneToMany(() => LikeReview, (like) => like.user, { cascade: true })
+  likeReview: LikeReview;
 
   /**
    * 1 : M 관계 설정
