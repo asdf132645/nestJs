@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
-import { join } from 'path';
+import path, { join } from 'path';
 import express from 'express';
 import { existsSync, mkdirSync } from 'fs';
 async function bootstrap() {
@@ -32,9 +32,12 @@ async function bootstrap() {
     methods: 'GET,PUT,POST,DELETE,UPDATE,OPTIONS',
     credentials: true,
   });
-
-  app.use('/public', express.static(join(__dirname, '../public')));
-
+  // let GLOBAL_PREFiX = 'api';
+  // app.use('/public', express.static(join(__dirname, '../public')));
+  //정적파일 저장 url dP -> http://localhost:3000/uploads/api/a.jpg api 는 뭐든 경로에 가상으로 붙여줌
+  app.useStaticAssets(join(__dirname, '../', 'uploads'), {prefix: '/uploads/image'});
+  app.setViewEngine('html');
+  // app.setGlobalPrefix(GLOBAL_PREFiX);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
