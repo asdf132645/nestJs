@@ -39,7 +39,7 @@ export class CompanyService {
           company_detail_address: rawCompany.company_detail_address,
           imgUrl: rawCompany.company_url,
           rating: avgRating,
-          companyGoPageNum: rawCompany.company_companyGoPageNum
+          companyCode: String(rawCompany.company_companyCode)
         })
       }
     }
@@ -48,7 +48,8 @@ export class CompanyService {
 
   async addThisCompany(newCompany: createdCompanyDto) {
     const company = new CompanyInformation();
-    const crypto = require("crypto");
+    const randomBytes = require('crypto').randomBytes(2)
+    const number = parseInt(randomBytes.toString('hex'), 16)
 
     company.company_name = newCompany.company_name;
     company.companyDescription = newCompany.companyDescription;
@@ -61,7 +62,7 @@ export class CompanyService {
     company.address = newCompany.address;
     company.detail_address = newCompany.detail_address;
     company.url = newCompany.url;
-    company.companyGoPageNum = "C" + Math.random().toString(36).substring(2, 11);
+    company.companyCode = "C" + number;
     await this.companyRepository.save(company);
     return new ResponseMessage().success().body({
       success: true,
@@ -71,6 +72,10 @@ export class CompanyService {
 
   async findComWithId(companyId: string) {
     return await this.companyRepository.findOne(companyId);
+  }
+
+  async findComWithCode(companyCode: string) {
+    return await this.companyRepository.findOne({companyCode: companyCode});
   }
 
   async getThisComWithId(companyId) {

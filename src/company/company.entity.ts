@@ -93,9 +93,9 @@ export class CompanyInformation extends BaseEntity {
 
   @Column({
     type: 'text',
-    comment: '회사 상세페이지 넘버',
+    comment: '회사 넘버',
   })
-  companyGoPageNum: string;
+  companyCode: string;
 
 
 

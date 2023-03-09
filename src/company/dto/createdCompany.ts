@@ -51,5 +51,5 @@ export class createdCompanyDto {
   reviews: Review[];
 
   @IsString()
-  companyGoPageNum: string;
+  companyCode: string;
 }

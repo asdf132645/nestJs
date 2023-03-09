@@ -139,4 +139,22 @@ export class CompanyController {
     // }
   }
 
+  @Get(':companyId')
+  async detailCompanyPage(@Param('companyId') companyCode: string) {
+    const rawVideoData = await this.companyService.findComWithId(companyCode);
+    const avgRating = await this.reviewsService.getThisComReviewAvgRate(
+      companyCode,
+    );
+    if (!rawVideoData) throw new BadRequestException('해당 업체가 없습니다.');
+
+
+    return new ResponseMessage().success().body({
+      success: true,
+      data: {
+        ...rawVideoData,
+        rating: avgRating,
+      },
+    }).build();
+  }
+
 }

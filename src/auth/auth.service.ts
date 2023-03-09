@@ -126,7 +126,7 @@ export class AuthService {
   async login(user: any) {
     // console.log(user === undefined);
     const payload = {
-      // seq: user.seq,
+      id: user.id,
       user_id: user.user_id,
       userName: user.userName,
       role: user.role,

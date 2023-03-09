@@ -24,14 +24,14 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   validateToken(token: string) {
-    // console.log(token)
+    console.log(token)
     const secretKey = process.env.JWT_REFRESH_TOKEN_SECRET ? process.env.JWT_REFRESH_TOKEN_SECRET : 'dev';
 
     try {
       const verify = this.jwtService.verify(token, { secret: secretKey });
       return verify;
     } catch (e) {
-      console.log(e.message)
+      console.log(e)
       switch (e.message) {
         // 토큰에 대한 오류를 판단합니다.
         case 'INVALID_TOKEN':

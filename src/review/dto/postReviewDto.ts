@@ -1,7 +1,17 @@
+import { IsNumber, IsString } from "class-validator";
+
 export class ReviewDto {
+  @IsString()
   text: string;
-  companyId: string;
+
+  @IsString()
+  companyCode: string;
+
+  @IsNumber()
   rating: number;
+
+  @IsString()
+  reviewImg:string;
 
   // private _reviewText: string;
   // private _videoId: number;

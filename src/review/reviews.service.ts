@@ -40,32 +40,32 @@ export class ReviewsService {
       .getOne();
   }
 
-  async getThisVidReviewAvgRate(companyId: number) {
+  async getThisVidReviewAvgRate(companyCode: string) {
     // 비디오 컨트롤러에서 평균 별점을 낼 때 사용하는 로직
     const avgRating = await this.reviewRepository
       .createQueryBuilder('review')
       .leftJoinAndSelect('review.company', 'company')
-      .where('company.id = :companyId', { companyId })
+      .where('company.companyCode = :companyCode', { companyCode })
       .select('AVG(review.rating)', 'avg')
       .getRawOne();
 
     if (avgRating === null) return 0;
     else return Number(avgRating.avg);
 
-    // const thisVideo = await this.videoRepository.findOne({ id: videoId });
-    // const thisVidReviewList = await this.reviewRepository.find({
-    //   video: thisVideo,
-    // });
-    // if (thisVidReviewList.length === 0) {
-    //   return 0;
-    // }
-    // const count = thisVidReviewList.length;
-    // let sum = 0;
-    // thisVidReviewList.map((review) => {
-    //   sum += review.rating;
-    // });
+  }
 
-    // return sum / count;
+  async getThisComReviewAvgRate(companyCode: string) {
+    // 비디오 컨트롤러에서 평균 별점을 낼 때 사용하는 로직
+    const avgRating = await this.reviewRepository
+      .createQueryBuilder('review')
+      .leftJoinAndSelect('review.company', 'company')
+      .where('company.companyCode = :companyCode', { companyCode })
+      .select('AVG(review.rating)', 'avg')
+      .getRawOne();
+
+    if (avgRating === null) return 0;
+    else return Number(avgRating.avg);
+
   }
 
   async addOrRemoveLike(user: User, review: Review) {
@@ -109,6 +109,8 @@ export class ReviewsService {
   }
 
   async findThisVidAndUserReview(company: any, user) {
+    // console.log(company)
+    // console.log(user)
     if (user === 'guest') {
       user = await this.userRepository.findOne({ userName: 'guest' });
     }
@@ -139,7 +141,7 @@ export class ReviewsService {
       .groupBy('review.id')
       .orderBy('likeCount', 'DESC')
       .getRawMany();
-
+      // console.log(rawCompanyList)
     // .createQueryBuilder('platformUsers')
     // .select('platformUsers.id')
     // .addSelect('COUNT(userLikes.id) as userLikesCount')
@@ -172,7 +174,7 @@ export class ReviewsService {
           createdAt: rawReview.review_createdAt,
           updatedAt: rawReview.review_updatedAt,
           user: reviewUser,
-          companyId: rawReview.review_companyId,
+          companyCode: rawReview.review_companyCode,
           likeCount,
           isLike,
         });
@@ -198,12 +200,15 @@ export class ReviewsService {
 
   async saveReview(user: User, company: CompanyInformation, req: ReviewDto) {
     const isExist = await this.reviewRepository.findOne({ user, company });
-    if (isExist) {
-      throw new UnprocessableEntityException('이미 리뷰가 존재합니다!.');
-    } else {
+    // console.log(company)
+    // if (isExist) {
+    //   throw new UnprocessableEntityException('이미 리뷰가 존재합니다!.');
+    // } else {
       const reviews = new Review();
       reviews.text = req.text;
       reviews.rating = req.rating;
+      reviews.reviewImg = req.reviewImg;
+      reviews.companyCode = req.companyCode;
       reviews.user = user;
       reviews.company = company;
       await this.reviewRepository.save(reviews);
@@ -218,7 +223,7 @@ export class ReviewsService {
         myReview: returnReview,
         message: '리뷰가 등록되었습니다.',
       });
-    }
+    // }
   }
 
   async deleteReview(id: number) {

@@ -21,6 +21,12 @@ export class Review {
   rating: number;
 
   @Column()
+  reviewImg: string;
+
+  @Column()
+  companyCode: string;
+
+  @Column()
   text: string;
 
   @OneToMany(() => LikeReview, (like) => like.review, { cascade: true })

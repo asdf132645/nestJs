@@ -18,6 +18,7 @@ import { UserService } from '../user/user.service';
 import { CompanyService } from '../company/company.service';
 import { ReviewDto } from './dto/postReviewDto';
 import { ReviewsService } from './reviews.service';
+import { TokenService } from "../auth/token.service";
 
 @Controller('reviews')
 export class ReviewsController {
@@ -25,10 +26,12 @@ export class ReviewsController {
     private reviewsService: ReviewsService,
     private CompanyService: CompanyService,
     private usersService: UserService,
+    private tokenService: TokenService,
   ) {
     this.reviewsService = reviewsService;
     this.CompanyService = CompanyService;
     this.usersService = usersService;
+    this.tokenService = tokenService;
   }
   @Get('reviewKing')
   async getReviewKing() {
@@ -53,18 +56,30 @@ export class ReviewsController {
     return await this.reviewsService.addOrRemoveLike(user, review);
   }
 
-  @Get(':companyId')
+  @Get(':companyCode')
   async findThisVidReview(
-    @Param('companyId') companyId: string,
+    @Param('companyCode') companyCode: string,
     @Query('page') page: number,
     @Headers() header,
   ): Promise<void> {
     let accessToken = null;
     let myuser;
+    console.log(header.authorization)
+    if (header.authorization) {
+      const rawAccessToken = header.authorization;
 
+      accessToken = await this.tokenService.resolveAccessToken(rawAccessToken.replace('Bearer ', ''));
+      if (accessToken) {
+        const { user_id } = accessToken;
+        const { iat } = accessToken;
+        // const accessTokenIat = new Date(iat * 1000 + 1000);
+        myuser = await this.usersService.findUserWithUserId(user_id);
+        console.log(myuser)
+      }
+    }
 
-    const company = await this.CompanyService.findComWithId(companyId);
-
+    const company = await this.CompanyService.findComWithCode(companyCode);
+    // console.log(company)
     if (!accessToken) {
       myuser = 'guest';
     }
@@ -80,21 +95,22 @@ export class ReviewsController {
 
     return Object.assign({
       totalCount,
-      reviewList: companyList.slice(8 * (page - 1), 8 * page),
+      reviewList: companyList,
       myReview: resultUserReview || null,
     });
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('saveReview')
   async saveReview(@Body() body: ReviewDto, @Request() request): Promise<void> {
+    // console.log(request.user)
     const user = request.user;
-    if (!body.companyId || !body.text || !body.rating) {
+    if (!body.companyCode || !body.text || !body.rating) {
       throw new BadRequestException(
-        'text 혹은 rating 혹은 videoId가 전달되지 않았습니다.',
+        'text 혹은 rating 혹은 Id가 전달되지 않았습니다.',
       );
     }
-    const company = await this.CompanyService.findComWithId(body.companyId);
+    const company = await this.CompanyService.findComWithCode(body.companyCode);
     return await this.reviewsService.saveReview(user, company, body);
   }
 
@@ -111,7 +127,7 @@ export class ReviewsController {
   @Patch()
   async patchReview(@Body() body: ReviewDto, @Request() req): Promise<void> {
     const user = req.user;
-    const video = await this.CompanyService.findComWithId(body.companyId);
+    const video = await this.CompanyService.findComWithId(body.companyCode);
     if (!video) throw new BadRequestException('해당 비디오가 없습니다.');
     return await this.reviewsService.patchReview(user, video, body);
   }
