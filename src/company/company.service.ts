@@ -30,7 +30,7 @@ export class CompanyService {
     if (companyList.length) {
       for (const rawCompany of companyList) {
         const avgRating = await this.reviewsService.getThisVidReviewAvgRate(
-          rawCompany.company_id,
+          rawCompany.company_companyCode,
         );
         companyListVar.push({
           company_name: rawCompany.company_company_name,

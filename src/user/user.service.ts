@@ -169,16 +169,17 @@ export class UserService {
       )
       .then(async (res) => {
         // 성공 이벤트
-        return '';
+        return new ResponseMessage().success().body(res).build();
       })
       .catch((err) => {
         console.error(err);
         // return err;
-        throw new ForbiddenException({
-          statusCode: HttpStatus.FORBIDDEN,
-          message: [`메시지 앱 호출 에러`],
-          error: 'Forbidden',
-        });
+        return  new ResponseMessage().error(200,'','메시지 앱 호출 에러').build()
+        // throw new ForbiddenException({
+        //   statusCode: HttpStatus.FORBIDDEN,
+        //   message: [`메시지 앱 호출 에러`],
+        //   error: 'Forbidden',
+        // });
       });
 
     // 캐시 추가하기

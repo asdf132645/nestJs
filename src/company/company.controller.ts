@@ -92,7 +92,7 @@ export class CompanyController {
     for (const company of companyList3) {
       const topVid = await this.companyService.getThisComWithId(company.id);
       const avgRating = await this.reviewsService.getThisVidReviewAvgRate(
-        company.id,
+        company.companyCode,
       );
       top5ReviewVidBox.push({
         ...topVid,
@@ -139,19 +139,31 @@ export class CompanyController {
     // }
   }
 
-  @Get(':companyId')
-  async detailCompanyPage(@Param('companyId') companyCode: string) {
-    const rawVideoData = await this.companyService.findComWithId(companyCode);
+  @Get(':companyCode')
+  async detailCompanyPage(@Param('companyCode') companyCode: string) {
+
+    const companyInformation = await this.companyService.findComWithCode(companyCode);
+
+    const companyDetail = {
+      company_name: companyInformation.company_name,
+      companyDescription: companyInformation.companyDescription,
+      companyType: companyInformation.companyType,
+      address: companyInformation.address,
+      detail_address: companyInformation.detail_address,
+      companyCode: companyInformation.companyCode,
+      createdAt: companyInformation.createdAt,
+      url: companyInformation.url,
+    }
     const avgRating = await this.reviewsService.getThisComReviewAvgRate(
       companyCode,
     );
-    if (!rawVideoData) throw new BadRequestException('해당 업체가 없습니다.');
+    if (!companyInformation) throw new BadRequestException('해당 업체가 없습니다.');
 
 
     return new ResponseMessage().success().body({
       success: true,
       data: {
-        ...rawVideoData,
+        companyDetail: companyDetail,
         rating: avgRating,
       },
     }).build();

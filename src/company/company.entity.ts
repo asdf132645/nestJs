@@ -86,10 +86,10 @@ export class CompanyInformation extends BaseEntity {
   detail_address: string;
 
   @Column({
-    type: 'text',
+    type: 'simple-array',
     comment: '이미지 url',
   })
-  url: string;
+  url: string[];
 
   @Column({
     type: 'text',
@@ -117,4 +117,5 @@ export class CompanyInformation extends BaseEntity {
 
   @OneToMany(() => Review, (review) => review.company, { cascade: true })
   reviews: Review[];
+
 }

@@ -35,7 +35,7 @@ export class createdCompanyDto {
   detail_address: string;
 
   @IsString()
-  url: string;
+  url: string[];
 
   @IsString()
   updatedAt: Date;
