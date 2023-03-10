@@ -28,11 +28,12 @@ export class JwtRefreshGuard extends AuthGuard('jwt-refresh-token') {
   }
 
   validateToken(user: any, request: any) {
-    // console.log(request.body.userId)
-    const refreshToken = request.cookies?.Refresh;
-    // return this.usersService.getUserIfRefreshTokenMatches(
-    //   refreshToken,
-    //   request.body.userId,
-    // );
+    // console.log(request.headers.refreshtoken)
+    // console.log('request.headers.refreshtoken')
+    const refreshToken = request.headers.refreshtoken;
+    return this.usersService.getUserIfRefreshTokenMatches(
+      refreshToken,
+      request.body.user_id,
+    );
   }
 }

@@ -240,20 +240,20 @@ export class AuthService {
         accountName: user.accountName,
       };
       // db에 저장된 토  큰과 비교
-
-      if (user.currentHashedRefreshToken == authorization) {
-        const token = this.jwtService.sign(payload, {
-          secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-          expiresIn: `${this.configService.get(
-            'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
-          )}s`,
-        });
+      // console.log(user.currentHashedRefreshToken == authorization)
+      // if (user.currentHashedRefreshToken == authorization) {
+        const token = this.jwtService.sign(payload);
+      // const token = this.jwtService.sign(payload, {
+      //   secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+      //   expiresIn: `${this.configService.get(
+      //     'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+      //   )}s`,
+      // });
         return {
-          token: token,
-          isAuth: true,
-
+          accessToken: token,
+          expiresIn: 3600,
         };
-      }
+      // }
     }
 
     // return {

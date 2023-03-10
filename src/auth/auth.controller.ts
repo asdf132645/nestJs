@@ -45,7 +45,7 @@ export class AuthController {
 
     const { refreshToken, ...refreshOption } =
       this.authService.getCookieWithJwtRefreshToken(user);
-    // console.log(user);
+    console.log(refreshToken);
     await this.userService.setCurrentRefreshToken(refreshToken, user);
 
     res.setHeader('Set-Cookie', [accessToken, refreshToken]);
@@ -58,7 +58,7 @@ export class AuthController {
     return await this.authService.login(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtRefreshGuard)
   @Post('logout') // async logOut(@Req() req, @Res({ passthrough: true }) res: Response) {
   async logout(@Req() req, @Res({ passthrough: true }) res): Promise<any> {
 
@@ -68,7 +68,7 @@ export class AuthController {
     res.cookie('Authentication', '', accessOption);
     res.cookie('Refresh', '', refreshOption);
 
-    console.log(req)
+    // console.log(req)
     const user = await this.userService.getById(req.body.user_id);
 
     await this.userService.removeRefreshToken(user);
@@ -102,10 +102,7 @@ export class AuthController {
             new ResponseMessage()
               .success()
               .body({
-                refresh: {
-                  token: result,
-                  expiresIn: 86400,
-                },
+                access: result,
 
               })
               .build()

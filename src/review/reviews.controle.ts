@@ -57,7 +57,7 @@ export class ReviewsController {
   }
 
   @Get(':companyCode')
-  async findThisVidReview(
+  async findThisCompanyReview(
     @Param('companyCode') companyCode: string,
     @Query('page') page: number,
     @Headers() header,

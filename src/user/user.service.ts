@@ -53,19 +53,23 @@ export class UserService {
 
   async setCurrentRefreshToken(refreshToken: string, user: any) {
     const currentHashedRefreshToken = await hash(refreshToken, 10);
-    await this.userRepository.update(user, { currentHashedRefreshToken });
+    // console.log('111112172678162781628761872687162871627816278618')
+
+    await this.userRepository.update(user.id, { currentHashedRefreshToken });
+
   }
 
   async removeRefreshToken(user: any) {
     // console.log(user)
-    return this.userRepository.update(user, {
+    return this.userRepository.update(user.id, {
       currentHashedRefreshToken: null,
     });
   }
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, id: string) {
+  async getUserIfRefreshTokenMatches(refreshToken: any, id: string) {
     const user = await this.getById(id);
-    // console.log(user);
+    console.log(user.currentHashedRefreshToken);
+    console.log(refreshToken);
     const isRefreshTokenMatching = await compare(
       refreshToken,
       user.currentHashedRefreshToken,
@@ -74,6 +78,7 @@ export class UserService {
     if (isRefreshTokenMatching) {
       return user;
     }
+    // return user;
   }
 
   async findUserWithUserId(user_id: string): Promise<User> {
@@ -87,7 +92,7 @@ export class UserService {
     const user = await this.userRepository.findOne({
       user_id: id,
     });
-    console.log(id);
+    console.log(user);
     if (user) {
       return user;
     }
